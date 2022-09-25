@@ -494,7 +494,6 @@ include_once '..\dbHelper\dbhelper.php';
                         type: "export"
                     },
                     success: function(res) {
-                        console.log(res)
                         assignUserLogs(res);
                     },
                     error: function(res) {
