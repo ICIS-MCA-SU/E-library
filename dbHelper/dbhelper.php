@@ -1139,7 +1139,7 @@ class dbhelper extends connect
     public function __loginReportsDeatails()
     {
         try {
-            $sql =  "SELECT id,first_name,last_name,enterDateTime,outDateTime FROM  sulibrary.userlogs inner join sulibrary.users on userlogs.userId=users.user_id";
+            $sql =  "SELECT id,first_name,last_name,enterDateTime,outDateTime FROM  sulibrary.userlogs ul,sulibrary.users u where ul.userId=u.user_id";
             $stmt = $this->__connect()->query($sql);
             if ($stmt->rowCount()) {
                 $rows = $stmt->fetchAll();
