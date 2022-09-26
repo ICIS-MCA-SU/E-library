@@ -1135,7 +1135,6 @@ class dbhelper extends connect
             die($e);
         }
     }
-
     public function __loginReportsDeatails()
     {
         try {
@@ -1442,48 +1441,7 @@ class dbhelper extends connect
     public function __getUserEBooks($userId)
     {
         try {
-            $sql = "Select * From sulibrary.books_owned inner join sulibrary.books on books_owned.book_id=books.book_id where book_type='e book' and user_id = '$userId'";
-            $stmt = $this->__connect()->query($sql);
-            if ($stmt->rowCount() > 0) {
-                $rows = $stmt->fetchAll();
-                return $rows;
-            } else return 0;
-        } catch (ErrorException $e) {
-            die($e);
-        }
-    }
-
-    public function __getUserPDFBooks($userId)
-    {
-        try {
-            $sql = "Select * From sulibrary.books_owned inner join sulibrary.books on books_owned.book_id=books.book_id where  book_type='PDF Books' and user_id = '$userId'";
-            $stmt = $this->__connect()->query($sql);
-            if ($stmt->rowCount() > 0) {
-                $rows = $stmt->fetchAll();
-                return $rows;
-            } else return 0;
-        } catch (ErrorException $e) {
-            die($e);
-        }
-    }
-
-    public function __getUserQuestionPaperBooks($userId)
-    {
-        try {
-            $sql = "Select * From sulibrary.books_owned inner join sulibrary.books on books_owned.book_id=books.book_id where  book_type='Question Paper' and user_id = '$userId'";
-            $stmt = $this->__connect()->query($sql);
-            if ($stmt->rowCount() > 0) {
-                $rows = $stmt->fetchAll();
-                return $rows;
-            } else return 0;
-        } catch (ErrorException $e) {
-            die($e);
-        }
-    }
-    public function __getUserStudyMaterialBooks($userId)
-    {
-        try {
-            $sql = "Select * From sulibrary.books_owned inner join sulibrary.books on books_owned.book_id=books.book_id where  book_type='Study Material' and user_id = '$userId'";
+            $sql = "Select * From sulibrary.books_owned inner join sulibrary.books on books_owned.book_id=books.book_id where user_id = '$userId'";
             $stmt = $this->__connect()->query($sql);
             if ($stmt->rowCount() > 0) {
                 $rows = $stmt->fetchAll();
