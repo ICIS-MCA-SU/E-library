@@ -2,7 +2,7 @@
 if (session_status() !== PHP_SESSION_ACTIVE || session_id() === "") {
     session_start();
 }
-
+ 
 include_once __DIR__ . '/connect.php';
 class dbhelper extends connect
 {
@@ -1138,7 +1138,7 @@ class dbhelper extends connect
     public function __loginReportsDeatails()
     {
         try {
-            $sql =  "SELECT id,first_name,last_name,enterDateTime,outDateTime FROM  sulibrary.userlogs ul,sulibrary.users u where ul.userId=u.user_id";
+            $sql =  "SELECT userId,first_name,last_name,enterDateTime,outDateTime FROM  sulibrary.userlogs ul,sulibrary.users u where ul.userId=u.user_id";
             $stmt = $this->__connect()->query($sql);
             if ($stmt->rowCount()) {
                 $rows = $stmt->fetchAll();
@@ -1148,6 +1148,8 @@ class dbhelper extends connect
             die($e);
         }
     }
+
+    
     public function __loginReportsDeatailsByLimit($startLimit, $endLimit)
     {
         try {
@@ -1161,10 +1163,25 @@ class dbhelper extends connect
             die($e);
         }
     }
+
+    // public function __loginReportsDeatailsByLimit($startLimit, $endLimit)
+    // {
+    //     try {
+    //         $sql =  "SELECT userId,first_name,last_name,enterDateTime,outDateTime FROM  sulibrary.userlogs JOIN sulibrary.users where userlogs.userId=users.user_id AND enterDateTime BETWEEN $startLimit AND $endLimit;";
+    //         $stmt = $this->__connect()->query($sql);
+    //         if ($stmt->rowCount()) {
+    //             $rows = $stmt->fetchAll();
+    //             return $rows;
+    //         } else return 0;
+    //     } catch (ErrorException $e) {
+    //         die($e);
+    //     }
+    // }
+
     public function __loginReportsDeatailSearchbyLimit($startDate, $endDate)
     {
         try {
-            $sql =  "SELECT * FROM  sulibrary.userlogs inner join sulibrary.users on userlogs.userId=users.user_id and date(userlogs.enterDateTime) BETWEEN date('$startDate') AND date('$endDate')";
+            $sql =  "SELECT * FROM  sulibrary.users inner join sulibrary.userlogs  on userlogs.userId=users.user_id and date(userlogs.enterDateTime) BETWEEN date('$startDate') AND date('$endDate')";
             $stmt = $this->__connect()->query($sql);
             if ($stmt->rowCount()) {
                 $rows = $stmt->fetchAll();
@@ -1174,6 +1191,8 @@ class dbhelper extends connect
             die($e);
         }
     }
+
+    
     public function __issuedBookDeatails($userid)
     {
         try {
@@ -1442,6 +1461,48 @@ class dbhelper extends connect
     {
         try {
             $sql = "Select * From sulibrary.books_owned inner join sulibrary.books on books_owned.book_id=books.book_id where user_id = '$userId'";
+            $stmt = $this->__connect()->query($sql);
+            if ($stmt->rowCount() > 0) {
+                $rows = $stmt->fetchAll();
+                return $rows;
+            } else return 0;
+        } catch (ErrorException $e) {
+            die($e);
+        }
+    }
+
+
+    public function __getUserPDFBooks($userId)
+    {
+        try {
+            $sql = "Select * From sulibrary.books_owned inner join sulibrary.books on books_owned.book_id=books.book_id where  book_type='PDF Books' and user_id = '$userId'";
+            $stmt = $this->__connect()->query($sql);
+            if ($stmt->rowCount() > 0) {
+                $rows = $stmt->fetchAll();
+                return $rows;
+            } else return 0;
+        } catch (ErrorException $e) {
+            die($e);
+        }
+    }
+
+    public function __getUserQuestionPaperBooks($userId)
+    {
+        try {
+            $sql = "Select * From sulibrary.books_owned inner join sulibrary.books on books_owned.book_id=books.book_id where  book_type='Question Paper' and user_id = '$userId'";
+            $stmt = $this->__connect()->query($sql);
+            if ($stmt->rowCount() > 0) {
+                $rows = $stmt->fetchAll();
+                return $rows;
+            } else return 0;
+        } catch (ErrorException $e) {
+            die($e);
+        }
+    }
+    public function __getUserStudyMaterialBooks($userId)
+    {
+        try {
+            $sql = "Select * From sulibrary.books_owned inner join sulibrary.books on books_owned.book_id=books.book_id where  book_type='Study Material' and user_id = '$userId'";
             $stmt = $this->__connect()->query($sql);
             if ($stmt->rowCount() > 0) {
                 $rows = $stmt->fetchAll();
