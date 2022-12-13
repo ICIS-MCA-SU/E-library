@@ -8,7 +8,6 @@ include_once '..\dbHelper\dbhelper.php';
         margin-top: 16px;
     }
 </style>
-<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="../css/jquery.datetimepicker.min.css" />
 <script src="../js/jquery.datetimepicker.full.min.js"></script>
@@ -40,7 +39,7 @@ include_once '..\dbHelper\dbhelper.php';
                     <div class=" col-md-3 col-12">
                         <div class="form-group">
                             <label for="Date">End Date</label>
-                            <input type="datetime" class="form-control" id="searchEndDate" aria-describedby="searchEndDate" placeholder="Select Start Date">
+                            <input type="datetime" class="form-control" id="searchEndDate" aria-describedby="searchEndDate" placeholder="Select End Date">
                         </div>
                     </div>
                     <div class=" col-md-2 col-6 text-center">
@@ -78,7 +77,6 @@ include_once '..\dbHelper\dbhelper.php';
                                     <td class="border-0 py-3" x-text="item.first_name"></td>
                                     <td class="border-0 py-3" x-text="new Date(item.enterDateTime).toLocaleString()"></td>
                                     <td class="border-0 py-3" x-text="item.outDateTime?new Date(item.outDateTime).toLocaleString():''"></td>
-
                                 </tr>
                             </template>
                             <template x-if="userLogJson.length>0?false:true">
@@ -93,15 +91,18 @@ include_once '..\dbHelper\dbhelper.php';
                         <template x-if="userLogJson.length>0?true:false">
 
                             <div class="row">
-                                <div class="col-12 justify-content-end">
-                                    <button class="btn btn-primary mb-2" x-bind:disabled="currentPage==1?true:false" type="button" x-on:click="getPrevPage">Prev</button>
-                                    <button class="btn btn-primary  mb-2" type="button" style="border-radius:10%" x-bind:id="1" x-on:click="getCurrentPageData">1</button>
-                                    <template x-for="no in totalPages" x-bind:key="no">
+                                <div class="col-12 justify-content-end" style="text-align:end">
+                                    <span>Showing <span x-text="startRecord"></span> to <span x-text="endRecord"></span> of <span x-text="totalEntries"></span> entries </span>
+                                    <button class="btn btn-primary mb-2 pagenationBtn" x-bind:disabled="currentPage==1?true:false" type="button" x-on:click="getPrevPage"><i class="fa-solid fa-chevron-left"></i></button>
+                                    <button class="btn btn-primary mb-2" style="display:none" x-bind:disabled="currentPage==1?true:false" type="button" x-on:click="getPrevPage">Prev</button>
+                                    <button class="btn btn-primary  mb-2" style="display:none" type="button" style="border-radius:10%" x-bind:id="1" x-on:click="getCurrentPageData">1</button>
+                                    <template x-for="no in totalPages" x-bind:key="no" style="display:none">
                                         <template x-if="no!=1?true:false">
-                                            <button class="btn btn-primary ml-1 mb-2" style="border-radius:10%" type="button" x-bind:id="no" x-text="no" x-on:click="getCurrentPageData"></button>
+                                            <button class="btn btn-primary ml-1 mb-2" style="border-radius:10%;display:none" type="button" x-bind:id="no" x-text="no" x-on:click="getCurrentPageData"></button>
                                         </template>
                                     </template>
-                                    <button class="btn btn-primary mr-1 mb-2" x-bind:disabled="currentPage==totalPages?true:false" type="button" x-on:click="getNextPage">Next</button>
+                                    <button class="btn btn-primary pagenationBtn mb-2" x-bind:disabled="currentPage==totalPages?true:false" type="button" x-on:click="getNextPage"><i class="fa-solid fa-chevron-right"></i></button>
+                                    <button class="btn btn-primary pagenationBtn mr-1 mb-2" x-bind:disabled="currentPage==totalPages?true:false" type="button" x-on:click="getLastPage"><i class="fa-solid fa-angles-right"></i></button>
                                 </div>
                             </div>
                         </template>
@@ -135,19 +136,23 @@ include_once '..\dbHelper\dbhelper.php';
                     <select name="catalog" id="noOfUsers" class="form-control">
                         <option value="0">Select</option>
                         <option value="5">5</option>
-                        <option value="7">10</option>
+                        <option value="10">10</option>
                         <option value="15">15</option>
-                        <option value="18">20</option>
+                        <option value="20">20</option>
                         <option value="25">25</option>
-                        <option value="47">50</option>
-                        <option value="98">100</option>
-                        <option value="194">200</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
                     </select>
                 </div>
             </div>
             <div class="modal-footer">
+                <span id="userLogInfo" style="display:none;color:green">Please wait..</span>
+
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" x-on:click="updateReports">Update</button>
+                <button type="button" class="btn btn-primary" x-on:click="updateReports" id="btnUpdate">Add Logs</button>
             </div>
         </div>
     </div>
@@ -161,24 +166,27 @@ include_once '..\dbHelper\dbhelper.php';
     jQuery('#searchStartDate').datetimepicker({
         timepicker: false,
         format: 'Y-m-d',
-        mask: true, // '9999/19/39 29:59' - digit is the maximum possible for a cell
+        mask: false, // '9999/19/39 29:59' - digit is the maximum possible for a cell
     });
     jQuery('#searchEndDate').datetimepicker({
         timepicker: false,
         format: 'Y-m-d',
-        mask: true, // '9999/19/39 29:59' - digit is the maximum possible for a cell
+        mask: false, // '9999/19/39 29:59' - digit is the maximum possible for a cell
     });
     let getUserLog = () => {
         return {
             userLogJson: [],
-            userLogJson1: [],
             startLimit: 0,
             endLimit: 10,
+            startRecord: 1,
+            endRecord: 10,
+            totalEntries: 0,
             totalPages: 0,
             currentPage: 1,
             count: 0,
             isSearch: false,
             allUsersList: [],
+            dbTransactionStarted: false,
             init() {
 
                 this.currentPage = 1;
@@ -186,13 +194,21 @@ include_once '..\dbHelper\dbhelper.php';
                 this.getUserLogs();
                 this.getAllUserLogs();
                 this.$watch('isSearch', () => {});
-                // this.$watch('userLogJson', () => {
-                //     if (this.isSearch == false) {
-                //         this.getUserLogs();
-                //         this.getAllUserLogs();
-                //     }
-                // });
-
+                this.$watch('userLogJson', () => {
+                    return this.userLogJson;
+                });
+                this.$watch("dbTransactionStarted", function() {
+                    return this.dbTransactionStarted;
+                });
+                this.$watch("startRecord", function() {
+                    return this.startRecord;
+                });
+                this.$watch("endRecord", function() {
+                    return this.endRecord;
+                });
+                this.$watch("totalEntries", function() {
+                    return this.totalEntries;
+                });
 
             },
             getUserLogs() {
@@ -223,8 +239,11 @@ include_once '..\dbHelper\dbhelper.php';
                     var pageLen = Math.ceil(JSON.parse(data).length / 10);
                     if (pageLen > 0) {
                         this.totalPages = parseInt(pageLen);
+                        this.totalEntries = JSON.parse(data).length;
+
                     } else {
                         this.totalPages = 1;
+                        this.totalEntries = 1;
                     }
                     // document.getElementById("1").style.background = "orange";
 
@@ -249,10 +268,12 @@ include_once '..\dbHelper\dbhelper.php';
             },
             getNextPage() {
                 if (this.currentPage <= this.totalPages) {
-                    document.getElementById(this.currentPage + 1).style.background = "orange";
+                    // document.getElementById(this.currentPage + 1).style.background = "orange";
 
-                    document.getElementById(this.currentPage).style.background = "#007bff";
+                    // document.getElementById(this.currentPage).style.background = "#007bff";
                     this.currentPage++;
+                    this.startRecord = ((this.currentPage - 1) * 10) + 1;
+                    this.endRecord = this.currentPage * 10;
                     this.startLimit = ((this.currentPage - 1) * 10);
                     this.endLimit = 10;
 
@@ -263,10 +284,12 @@ include_once '..\dbHelper\dbhelper.php';
 
 
                 if (this.currentPage > 1) {
-                    document.getElementById(this.currentPage - 1).style.background = "orange";
-                    document.getElementById(this.currentPage).style.background = "#007bff";
+                    // document.getElementById(this.currentPage - 1).style.background = "orange";
+                    // document.getElementById(this.currentPage).style.background = "#007bff";
 
                     this.currentPage--;
+                    this.startRecord = ((this.currentPage - 1) * 10) + 1;
+                    this.endRecord = this.currentPage * 10;
                     this.startLimit = (this.currentPage - 1) * 10;
                     this.endLimit = 10;
                     this.getUserLogs();
@@ -274,9 +297,29 @@ include_once '..\dbHelper\dbhelper.php';
             },
             getCurrentPageData(e) {
                 this.currentPage = e.target.innerText;
-                document.getElementById(this.currentPage).style.background = "orange";
-                if (this.currentPage >= 1) {
-                    document.getElementById(this.currentPage - 1).style.background = "#007bff";
+                // document.getElementById(this.currentPage).style.background = "orange";
+                // if (this.currentPage >= 1) {
+                //     document.getElementById(this.currentPage - 1).style.background = "#007bff";
+                // }
+                this.startRecord = ((this.currentPage - 1) * 10);
+                this.endRecord = this.currentPage * 10;
+                this.startLimit = ((this.currentPage - 1) * 10);
+                this.endLimit = 10;
+                this.getUserLogs();
+            },
+            getLastPage(e) {
+                // if (this.currentPage >= 1) {
+                //     document.getElementById(this.currentPage).style.background = "#007bff";
+                // }
+                this.currentPage = this.totalPages;
+                // document.getElementById(this.currentPage).style.background = "orange";
+
+                this.startRecord = ((this.currentPage - 1) * 10);
+                var val = this.currentPage * 10;
+                if (val > this.totalEntries) {
+                    this.endRecord = this.totalEntries;
+                } else {
+                    this.endRecord = this.currentPage * 10;
                 }
 
                 this.startLimit = ((this.currentPage - 1) * 10);
@@ -284,6 +327,26 @@ include_once '..\dbHelper\dbhelper.php';
                 this.getUserLogs();
             },
             updateReports() {
+                document.getElementById("userLogInfo").style.display = "block";
+                document.getElementById("btnUpdate").disabled = true;
+                const reload = () => {
+                    this.dbTransactionStarted = false;
+                    document.getElementById("userLogInfo").style.display = "none";
+                    document.getElementById("btnUpdate").disabled = false;
+
+                    if (this.userLogJson.length == undefined) {
+                        location.reload();
+                    } else {
+                        this.getUserLogs();
+                        this.getAllUserLogs();
+                    }
+                    $("#exampleModalCenter").modal("hide");
+                    location.reload();
+
+                    // location.reload();
+                };
+
+
                 var startDate = document.getElementById("startDate").value;
                 var noOfUsers = document.getElementById("noOfUsers").value;
                 var res = [];
@@ -302,7 +365,6 @@ include_once '..\dbHelper\dbhelper.php';
                             type: "error",
                         });
                     } else {
-                        console.log(new Date(startDate).getHours());
                         for (let i = 0; i < noOfUsers; i++) {
                             const random = Math.floor(Math.random() * this.allUsersList.length);
                             if (res.indexOf(this.allUsersList[random]) !== -1) {
@@ -321,19 +383,8 @@ include_once '..\dbHelper\dbhelper.php';
                 //     }
                 //     return randomString;
                 // }
-                const reload = () => {
 
-                    if (this.userLogJson.length == undefined) {
-                        location.reload();
-                    } else {
-                        this.getUserLogs();
-                        this.getAllUserLogs();
-                    }
-                    $("#exampleModalCenter").modal("hide");
-                    location.reload();
 
-                    // location.reload();
-                };
                 for (let i = 0; i < res.length; i++) {
                     var randomHours = Math.floor(Math.random() * (5 - 1 + 1)) + 1;;
                     var randomLogoutHours = Math.floor(Math.random() * (10 - 6 + 1)) + 6;
@@ -359,21 +410,24 @@ include_once '..\dbHelper\dbhelper.php';
                             startDate: startDateTime.toLocaleString(),
                             endDate: endDateTime.toLocaleString(),
                         },
-                        success: function(res) {
-                            if (res == "success") {
-                                swal("Good job!", "Update Completed", "success");
-                                reload();
+                        success: function(resp) {
+                            if (i == (res.length - 1)) {
+                                if (resp == "success") {
+                                    swal("Good job!", noOfUsers + " Userlogs Added Successfully", "success");
+                                    reload();
 
+                                }
                             }
                         },
-                        error: function(res) {
-                            swal({
-                                title: "Errror",
-                                text: "Update failed",
-                                type: "error",
+                        error: function(err) {
+                            if (i == (res.length - 1)) {
+                                swal({
+                                    title: "Errror",
+                                    text: "Update failed",
+                                    type: "error",
 
-                            });
-                            console.log(res);
+                                });
+                            }
                         }
                     });
                 }
@@ -408,7 +462,20 @@ include_once '..\dbHelper\dbhelper.php';
                 const assignUserLogs = (data) => {
                     if (searchStartDate != "" || searchEndDate != "") {
                         var filename = "UserLogs.csv";
-                        var ws = XLSX.utils.json_to_sheet(this.userLogJson);
+                        var jsonArr = this.userLogJson.map(o => {
+                            let obj = Object.assign({}, o);
+                            delete obj.photo;
+                            delete obj.IsDeleted;
+                            delete obj.user_id;
+                            delete obj.password;
+                            delete obj.exipry_date;
+                            delete obj.userId;
+                            delete obj.status;
+                            delete obj.Isdeleted;
+
+                            return obj;
+                        });
+                        var ws = XLSX.utils.json_to_sheet(jsonArr);
                         var wb = XLSX.utils.book_new();
                         XLSX.utils.book_append_sheet(wb, ws, "People");
                         XLSX.writeFile(wb, filename);
@@ -472,7 +539,7 @@ include_once '..\dbHelper\dbhelper.php';
                 document.getElementById("searchEndDate").value = "";
                 this.isSearch = false;
                 this.userLogJson = [];
-                this.totalPages=0;
+                this.totalPages = 0;
                 this.getUserLogs();
                 this.getAllUserLogs();
             }

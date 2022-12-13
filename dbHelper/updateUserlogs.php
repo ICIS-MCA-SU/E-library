@@ -5,11 +5,13 @@ if ($type == "allUsers") {
     $dbh = new dbhelper();
     $result = $dbh->__getAllUser();
     print json_encode($result);
-} else if ($type == "export") {
+}
+if ($type == "export") {
     $dbh = new dbhelper();
     $result = $dbh->__loginReportsDeatails();
     print json_encode($result);
-} else if ($type == "search") {
+}
+if ($type == "search") {
     $startDate = $_GET['searchStartDate'];
     $endDate = $_GET['searchEndDate'];
     $dbh = new dbhelper();
