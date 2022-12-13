@@ -133,7 +133,8 @@ include_once '..\dbHelper\dbhelper.php';
                 </div>
                 <div class="form-group">
                     <label for="exampleInputEmail1">Select No. of Users</label>
-                    <select name="catalog" id="noOfUsers" class="form-control">
+                    <input type="number" name="catalog" id="noOfUsers" class="form-control">
+                    <!-- <select name="catalog" id="noOfUsers" class="form-control">
                         <option value="0">Select</option>
                         <option value="5">5</option>
                         <option value="10">10</option>
@@ -145,7 +146,7 @@ include_once '..\dbHelper\dbhelper.php';
                         <option value="200">200</option>
                         <option value="500">500</option>
                         <option value="1000">1000</option>
-                    </select>
+                    </select> -->
                 </div>
             </div>
             <div class="modal-footer">
@@ -466,12 +467,18 @@ include_once '..\dbHelper\dbhelper.php';
                             let obj = Object.assign({}, o);
                             delete obj.photo;
                             delete obj.IsDeleted;
-                            delete obj.user_id;
+                            // delete obj.user_id;
                             delete obj.password;
                             delete obj.exipry_date;
                             delete obj.userId;
                             delete obj.status;
                             delete obj.Isdeleted;
+                            delete obj.phone;
+                            delete obj.email;
+                            delete obj.Id;
+                            delete obj.course;
+                            delete obj.regno;
+                            delete obj.role;
 
                             return obj;
                         });
