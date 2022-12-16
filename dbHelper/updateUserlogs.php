@@ -6,6 +6,14 @@ if ($type == "allUsers") {
     $result = $dbh->__getAllUser();
     print json_encode($result);
 }
+
+if ($type == "usersByLimit") {
+    $noUser = $_GET['noUser'];
+
+    $dbh = new dbhelper();
+    $result = $dbh->__getUsersByLimit($noUser);
+    print json_encode($result);
+} 
 if ($type == "export") {
     $dbh = new dbhelper();
     $result = $dbh->__loginReportsDeatails();

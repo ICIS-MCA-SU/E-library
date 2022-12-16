@@ -153,7 +153,7 @@ include_once '..\dbHelper\dbhelper.php';
                 <span id="userLogInfo" style="display:none;color:green">Please wait..</span>
 
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" x-on:click="updateReports" id="btnUpdate">Add Logs</button>
+                <button type="button" class="btn btn-primary" x-on:click="addUserLogs" id="btnUpdate">Add Logs</button>
             </div>
         </div>
     </div>
@@ -191,7 +191,7 @@ include_once '..\dbHelper\dbhelper.php';
             init() {
 
                 this.currentPage = 1;
-                this.getAllUsers();
+                //  this.getAllUsers();
                 this.getUserLogs();
                 this.getAllUserLogs();
                 this.$watch('isSearch', () => {});
@@ -267,6 +267,7 @@ include_once '..\dbHelper\dbhelper.php';
                 });
 
             },
+
             getNextPage() {
                 if (this.currentPage <= this.totalPages) {
                     // document.getElementById(this.currentPage + 1).style.background = "orange";
@@ -328,8 +329,6 @@ include_once '..\dbHelper\dbhelper.php';
                 this.getUserLogs();
             },
             updateReports() {
-                document.getElementById("userLogInfo").style.display = "block";
-                document.getElementById("btnUpdate").disabled = true;
                 const reload = () => {
                     this.dbTransactionStarted = false;
                     document.getElementById("userLogInfo").style.display = "none";
@@ -351,6 +350,7 @@ include_once '..\dbHelper\dbhelper.php';
                 var startDate = document.getElementById("startDate").value;
                 var noOfUsers = document.getElementById("noOfUsers").value;
                 var res = [];
+
                 if (startDate == "" || noOfUsers == 0) {
                     swal({
                         title: "Error",
@@ -359,6 +359,7 @@ include_once '..\dbHelper\dbhelper.php';
 
                     });
                 } else {
+
                     if (new Date(startDate) > new Date()) {
                         swal({
                             title: "Error",
@@ -366,62 +367,57 @@ include_once '..\dbHelper\dbhelper.php';
                             type: "error",
                         });
                     } else {
-                        for (let i = 0; i < noOfUsers; i++) {
-                            const random = Math.floor(Math.random() * this.allUsersList.length);
-                            if (res.indexOf(this.allUsersList[random]) !== -1) {
-                                continue;
+                        console.log(noOfUsers);
+                        // for (let i = 0; i < noOfUsers; i++) {
+                        //     var random = Math.floor(Math.random() * this.allUsersList.length);
+                        //     console.log("random", random);
+                        //     if (res.indexOf(this.allUsersList[random]) !== -1) {
+                        //         count += 1;
+                        //         random = Math.floor(Math.random() * this.allUsersList.length);
+                        //     }
+                        //     res.push(this.allUsersList[random]);
+                        // }
+                        var totLen = this.allUsersList.length;
+                        var userLogArr = [];
+                        for (let i = 0; i < this.allUsersList.length; i++) {
+                            var randomHours = Math.floor(Math.random() * 10) + 1;
+                            var randomLogoutHours = randomHours + Math.floor(Math.random() * 2) + 1;
+                            var randomMinutes1 = Math.floor(Math.random() * (60 - 1 + 1)) + 1;
+                            var randomMinutes2 = Math.floor(Math.random() * (60 - 10 + 1)) + 10;
+                            var startDate = new Date(startDate);
+                            let startDateTime = new Date(new Date(startDate).setHours(new Date(startDate).getHours() + randomHours));
+                            startDateTime = new Date(new Date(startDateTime).setMinutes(new Date(startDateTime).getMinutes() + randomMinutes1));
+                            var endDate = new Date(startDate);
+                            let endDateTime = new Date(new Date(endDate).setHours(new Date(endDate).getHours() + randomLogoutHours));
+                            endDateTime = new Date(new Date(endDateTime).setMinutes(new Date(endDateTime).getMinutes() + randomMinutes2));
+                            console.log(startDateTime.toLocaleString());
+                            console.log(endDateTime.toLocaleString());
+                            console.log(this.allUsersList[i].user_id);
+                            var item = {
+                                userId: this.allUsersList[i].user_id,
+                                startDate: startDateTime.toLocaleString(),
+                                endDate: endDateTime.toLocaleString(),
                             };
-                            res.push(this.allUsersList[random]);
-                        };
-                    }
-                }
-                // const randomString = (len, charSet) => {
-                //     charSet = charSet || 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-                //     var randomString = '';
-                //     for (var i = 0; i < len; i++) {
-                //         var randomPoz = Math.floor(Math.random() * charSet.length);
-                //         randomString += charSet.substring(randomPoz, randomPoz + 1);
-                //     }
-                //     return randomString;
-                // }
+                            userLogArr.push(item);
 
-
-                for (let i = 0; i < res.length; i++) {
-                    var randomHours = Math.floor(Math.random() * (5 - 1 + 1)) + 1;;
-                    var randomLogoutHours = Math.floor(Math.random() * (10 - 6 + 1)) + 6;
-                    var randomMinutes1 = Math.floor(Math.random() * (60 - 1 + 1)) + 1;
-                    var randomMinutes2 = Math.floor(Math.random() * (60 - 10 + 1)) + 10;
-
-                    var startDate = new Date(startDate);
-                    let startDateTime = new Date(new Date(startDate).setHours(new Date(startDate).getHours() + randomHours));
-                    startDateTime = new Date(new Date(startDateTime).setMinutes(new Date(startDateTime).getMinutes() + randomMinutes1));
-                    var endDate = new Date(startDate);
-                    let endDateTime = new Date(new Date(endDate).setHours(new Date(endDate).getHours() + randomLogoutHours));
-                    endDateTime = new Date(new Date(endDateTime).setMinutes(new Date(endDateTime).getMinutes() + randomMinutes2));
-                    console.log(startDateTime.toLocaleString());
-                    console.log(endDateTime.toLocaleString());
-                    console.log(res[i].user_id);
-
-                    $.ajax({
-                        type: "GET",
-                        url: "../dbHelper/updateUserlogs.php",
-                        data: {
-                            type: "AddUserLog",
-                            userId: res[i].user_id,
-                            startDate: startDateTime.toLocaleString(),
-                            endDate: endDateTime.toLocaleString(),
-                        },
-                        success: function(resp) {
-                            if (i == (res.length - 1)) {
+                        }
+                        $.ajax({
+                            type: "POST",
+                            url: "../dbHelper/addLogs.php",
+                            data: {
+                                type: "AddUserLog",
+                                data: userLogArr
+                            },
+                            success: function(resp) {
+                                console.log(resp);
                                 if (resp == "success") {
                                     swal("Good job!", noOfUsers + " Userlogs Added Successfully", "success");
                                     reload();
 
                                 }
-                            }
-                        },
-                        error: function(err) {
-                            if (i == (res.length - 1)) {
+                            },
+                            error: function(err) {
+                                console.log(err);
                                 swal({
                                     title: "Errror",
                                     text: "Update failed",
@@ -429,10 +425,9 @@ include_once '..\dbHelper\dbhelper.php';
 
                                 });
                             }
-                        }
-                    });
+                        });
+                    }
                 }
-
             },
             getAllUsers() {
                 const assignUsers = (data) => {
@@ -457,6 +452,34 @@ include_once '..\dbHelper\dbhelper.php';
                     }
                 });
             },
+            addUserLogs() {
+                var noOfUsers = document.getElementById("noOfUsers").value;
+                document.getElementById("userLogInfo").style.display = "block";
+                document.getElementById("btnUpdate").disabled = true;
+                const assignUsers = (data) => {
+                    this.allUsersList = JSON.parse(data);
+                    this.updateReports();
+                }
+                $.ajax({
+                    type: "GET",
+                    url: "../dbHelper/updateUserlogs.php",
+                    data: {
+                        type: "usersByLimit",
+                        noUser: noOfUsers
+                    },
+                    success: function(res) {
+                        assignUsers(res);
+                    },
+                    error: function(res) {
+                        swal({
+                            title: "Updation failed",
+                            text: "Error Updation failed",
+                            type: "error",
+
+                        });
+                    }
+                });
+            },
             exportReport() {
                 var searchStartDate = document.getElementById("searchStartDate").value;
                 var searchEndDate = document.getElementById("searchEndDate").value;
@@ -467,18 +490,12 @@ include_once '..\dbHelper\dbhelper.php';
                             let obj = Object.assign({}, o);
                             delete obj.photo;
                             delete obj.IsDeleted;
-                            // delete obj.user_id;
+                            delete obj.user_id;
                             delete obj.password;
                             delete obj.exipry_date;
                             delete obj.userId;
                             delete obj.status;
                             delete obj.Isdeleted;
-                            delete obj.phone;
-                            delete obj.email;
-                            delete obj.Id;
-                            delete obj.course;
-                            delete obj.regno;
-                            delete obj.role;
 
                             return obj;
                         });

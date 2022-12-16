@@ -78,6 +78,31 @@ class dbhelper extends connect
         // $_SESSION["userLogId"] =$stmt->Id;
         return  1;
     }
+    public function __createUserLogArray($data)
+    {
+        $sql = "INSERT INTO sulibrary.userlogs(`userId`, enterDateTime,outDateTime) VALUES (?,?,?);";
+        $stmt = $this->__connect()->prepare($sql);
+        foreach ($data as $item) {
+
+            $enterTime = new DateTime($item['startDate']);
+            $outTime = new DateTime($item['endDate']);
+            $stmt->execute([($item['userId']), $enterTime->format('Y-m-d H:i:s'), $outTime->format('Y-m-d H:i:s')]);
+        }
+        return  1;
+    }
+    public function __getUsersByLimit($endLimit)
+    {
+        try {
+            $sql =  "SELECT * FROM sulibrary.users  ORDER BY RAND() LIMIT $endLimit";
+            $stmt = $this->__connect()->query($sql);
+            if ($stmt->rowCount()) {
+                $rows = $stmt->fetchAll();
+                return $rows;
+            } else return 0;
+        } catch (ErrorException $e) {
+            die($e);
+        }
+    }
     public function __updateUserLog($userId, $outDateTime)
     {
         $sql = "update sulibrary.userlogs set outDateTime='$outDateTime' where Id='$userId'";
